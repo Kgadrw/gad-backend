@@ -2,6 +2,7 @@ import { Router } from "express";
 import multer from "multer";
 import { requireAdmin } from "../middleware/requireAdmin.js";
 import { defaultContent } from "../services/defaultContent.js";
+import { uploadImageBuffer } from "../services/cloudinary.js";
 import { normalizeContent } from "../services/normalizeContent.js";
 import { readContent, writeContent } from "../services/contentStore.js";
 import type { PortfolioContent } from "../types/portfolioContent.js";
@@ -31,11 +32,11 @@ const upload = multer({
   },
 });
 
-adminRouter.post("/upload", upload.single("file"), (req, res) => {
+adminRouter.post("/upload", upload.single("file"), async (req, res) => {
   const file = req.file;
   if (!file) return res.status(400).json({ error: "missing_file" });
-  const mimeType = file.mimetype || "application/octet-stream";
-  const url = `data:${mimeType};base64,${file.buffer.toString("base64")}`;
-  return res.json({ url });
+
+  const result = await uploadImageBuffer(file.buffer);
+  return res.json({ url: result.secure_url });
 });
 
