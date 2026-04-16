@@ -10,10 +10,11 @@ import { adminRouter } from "./routes/admin.js";
 
 export function createApp() {
   const app = express();
+  app.set("trust proxy", 1);
 
   app.use(
     cors({
-      origin: env.clientOrigins,
+      origin: (_origin, callback) => callback(null, true),
       credentials: true,
     }),
   );
